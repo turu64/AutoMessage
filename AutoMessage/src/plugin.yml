@@ -1,10 +1,10 @@
 name: AutoMessage
-version: 2.6.0
+version: 2.6.1
 author: [ELCHILEN0, brunyman]
 description: Schedule easily configurable broadcasts!
 website: https://www.craftersland.net/
 main: com.TeamNovus.AutoMessage.AutoMessage
-api-version: 1.13
+api-version: 1.21
 load: STARTUP
 commands:
    automessage:

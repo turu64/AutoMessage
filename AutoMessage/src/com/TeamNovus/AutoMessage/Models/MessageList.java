@@ -5,245 +5,241 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.HoverEvent.Action;
+import com.TeamNovus.AutoMessage.AutoMessage;
+import com.TeamNovus.AutoMessage.Util.Utils;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 public class MessageList {
-	private boolean enabled = true;
-	private int interval = 45;
-	private long expiry = -1L;
-	private boolean random = false;
-	private List<Message> messages = new LinkedList<Message>();
+    private static final GsonComponentSerializer GSON_SERIALIZER = GsonComponentSerializer.gson();
 
-	private transient int currentIndex = 0;
+    private boolean enabled = true;
+    private int interval = 45;
+    private long expiry = -1L;
+    private boolean random = false;
+    private List<Message> messages = new LinkedList<Message>();
 
-	public MessageList() {
-		messages.add(new Message("First message in the list!"));
-		messages.add(new Message("&aSecond message in the list with formatters!"));
-		messages.add(new Message("&bThird message in the list with formatters and a \nnew line!"));
-	}
+    private transient int currentIndex = 0;
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public MessageList() {
+        messages.add(new Message("First message in the list!"));
+        messages.add(new Message("&aSecond message in the list with formatters!"));
+        messages.add(new Message("&bThird message in the list with formatters and a \nnew line!"));
+    }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-	public int getInterval() {
-		return interval;
-	}
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
-	public void setInterval(int interval) {
-		this.interval = interval;
-	}
+    public int getInterval() {
+        return interval;
+    }
 
-	public long getExpiry() {
-		return expiry;
-	}
+    public void setInterval(int interval) {
+        this.interval = interval;
+    }
 
-	public void setExpiry(long expiry) {
-		this.expiry = expiry;
-	}
+    public long getExpiry() {
+        return expiry;
+    }
 
-	public boolean isExpired() {
-		return System.currentTimeMillis() >= expiry && expiry != -1;
-	}
+    public void setExpiry(long expiry) {
+        this.expiry = expiry;
+    }
 
-	public boolean isRandom() {
-		return random;
-	}
+    public boolean isExpired() {
+        return System.currentTimeMillis() >= expiry && expiry != -1;
+    }
 
-	public void setRandom(boolean random) {
-		this.random = random;
-	}
+    public boolean isRandom() {
+        return random;
+    }
 
-	public List<Message> getMessages() {
-		return messages;
-	}
+    public void setRandom(boolean random) {
+        this.random = random;
+    }
 
-	public void setMessages(List<Message> messages) {
-		this.messages = messages;
-	}
+    public List<Message> getMessages() {
+        return messages;
+    }
 
-	public void addMessage(Message message) {
-		this.messages.add(message);
-	}
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+    }
 
-	public Message getMessage(Integer index) {
-		try {
-			return this.messages.get(index.intValue());
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
-	}
+    public void addMessage(Message message) {
+        this.messages.add(message);
+    }
 
-	public void addMessage(Integer index, Message message) {
-		try {
-			this.messages.add(index.intValue(), message);
-		} catch (IndexOutOfBoundsException e) {
-			this.messages.add(message);
-		}
-	}
+    public Message getMessage(Integer index) {
+        try {
+            return this.messages.get(index.intValue());
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
+    }
 
-	public boolean editMessage(Integer index, Message message) {
-		try {
-			return this.messages.set(index.intValue(), message) != null;
-		} catch (IndexOutOfBoundsException e) {
-			return false;
-		}
-	}
+    public void addMessage(Integer index, Message message) {
+        try {
+            this.messages.add(index.intValue(), message);
+        } catch (IndexOutOfBoundsException e) {
+            this.messages.add(message);
+        }
+    }
 
-	public boolean removeMessage(Integer index) {
-		try {
-			return this.messages.remove(index.intValue()) != null;
-		} catch (IndexOutOfBoundsException e) {
-			return false;
-		}
-	}
+    public boolean editMessage(Integer index, Message message) {
+        try {
+            return this.messages.set(index.intValue(), message) != null;
+        } catch (IndexOutOfBoundsException e) {
+            return false;
+        }
+    }
 
-	public boolean hasMessages() {
-		return messages.size() > 0;
-	}
+    public boolean removeMessage(Integer index) {
+        try {
+            return this.messages.remove(index.intValue()) != null;
+        } catch (IndexOutOfBoundsException e) {
+            return false;
+        }
+    }
 
-	public void setCurrentIndex(int index) {
-		this.currentIndex = index;
+    public boolean hasMessages() {
+        return messages.size() > 0;
+    }
 
-		if (currentIndex >= messages.size() || currentIndex < 0) {
-			this.currentIndex = 0;
-		}
-	}
+    public void setCurrentIndex(int index) {
+        this.currentIndex = index;
 
-	public int getCurrentIndex() {
-		return currentIndex;
-	}
+        if (currentIndex >= messages.size() || currentIndex < 0) {
+            this.currentIndex = 0;
+        }
+    }
 
-	public void broadcast(int index) {
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			broadcastTo(index, player);
-		}
+    public int getCurrentIndex() {
+        return currentIndex;
+    }
 
-		broadcastTo(index, Bukkit.getConsoleSender());
-	}
+    public void broadcast(int index) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            broadcastTo(index, player);
+        }
 
-	public void broadcastTo(int index, CommandSender to) {
-		Message message = getMessage(index);
+        broadcastTo(index, Bukkit.getConsoleSender());
+    }
 
-		if (message != null) {
-			List<String> messages = message.getMessages();
-			List<String> commands = message.getCommands();
+    public void broadcastTo(int index, CommandSender to) {
+        Message message = getMessage(index);
 
-			for (int i = 0; i < messages.size(); i++) {
-				String m = messages.get(i);
+        if (message == null) {
+            return;
+        }
 
-				if (to instanceof Player) {
-					if (m.contains("{NAME}"))
-						m = m.replace("{NAME}", ((Player) to).getName());
-					if (m.contains("{DISPLAY_NAME}"))
-						m = m.replace("{DISPLAY_NAME}", ((Player) to).getDisplayName());
-					if (m.contains("{WORLD}"))
-						m = m.replace("{WORLD}", ((Player) to).getWorld().getName());
-					if (m.contains("{BIOME}"))
-						m = m.replace("{BIOME}", ((Player) to).getLocation().getBlock().getBiome().toString());
-				} else if (to instanceof ConsoleCommandSender) {
-					if (m.contains("{NAME}"))
-						m = m.replace("{NAME}", to.getName());
-					if (m.contains("{DISPLAY_NAME}"))
-						m = m.replace("{DISPLAY_NAME}", to.getName());
-					if (m.contains("{WORLD}"))
-						m = m.replace("{WORLD}", "UNKNOWN");
-					if (m.contains("{BIOME}"))
-						m = m.replace("{BIOME}", "UNKNOWN");
-				}
+        List<String> lines = message.getMessages();
+        List<String> commands = message.getCommands();
+        Calendar now = Calendar.getInstance();
 
-				if (m.contains("{ONLINE}"))
-					m = m.replace("{ONLINE}", Bukkit.getServer().getOnlinePlayers().size() + "");
-				if (m.contains("{MAX_ONLINE}"))
-					m = m.replace("{MAX_ONLINE}", Bukkit.getServer().getMaxPlayers() + "");
-				if (m.contains("{UNIQUE_PLAYERS}"))
-					m = m.replace("{UNIQUE_PLAYERS}", Bukkit.getServer().getOfflinePlayers().length + "");
+        if (message.isJsonFormat()) {
+            for (String line : lines) {
+                String processed = applyPlaceholders(line, to, now);
+                sendJsonMessage(to, processed);
+            }
+        } else {
+            for (String line : lines) {
+                String processed = applyPlaceholders(line, to, now);
+                to.sendMessage(Utils.translateColorCodes(processed));
+            }
+        }
 
-				if (m.contains("{YEAR}"))
-					m = m.replace("{YEAR}", Calendar.getInstance().get(Calendar.YEAR) + "");
-				if (m.contains("{MONTH}"))
-					m = m.replace("{MONTH}", Calendar.getInstance().get(Calendar.MONTH) + "");
-				if (m.contains("{WEEK_OF_MONTH}"))
-					m = m.replace("{WEEK_OF_MONTH}", Calendar.getInstance().get(Calendar.WEEK_OF_MONTH) + "");
-				if (m.contains("{WEEK_OF_YEAR}"))
-					m = m.replace("{WEEK_OF_YEAR}", Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) + "");
-				if (m.contains("{DAY_OF_WEEK}"))
-					m = m.replace("{DAY_OF_WEEK}", Calendar.getInstance().get(Calendar.DAY_OF_WEEK) + "");
-				if (m.contains("{DAY_OF_MONTH}"))
-					m = m.replace("{DAY_OF_MONTH}", Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "");
-				if (m.contains("{DAY_OF_YEAR}"))
-					m = m.replace("{DAY_OF_YEAR}", Calendar.getInstance().get(Calendar.DAY_OF_YEAR) + "");
-				if (m.contains("{HOUR}"))
-					m = m.replace("{HOUR}", Calendar.getInstance().get(Calendar.HOUR) + "");
-				if (m.contains("{HOUR_OF_DAY}"))
-					m = m.replace("{HOUR_OF_DAY}", Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "");
-				if (m.contains("{MINUTE}"))
-					m = m.replace("{MINUTE}", Calendar.getInstance().get(Calendar.MINUTE) + "");
-				if (m.contains("{SECOND}"))
-					m = m.replace("{SECOND}", Calendar.getInstance().get(Calendar.SECOND) + "");
-				
-				if (message.isJsonFormat() && to instanceof Player) {
-					//String v = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+        for (String command : commands) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replaceFirst("/", ""));
+        }
+    }
 
-					try {
-						// Parse the message
-						//Object parsedMessage = Class.forName("net.minecraft.server." + v + ".IChatBaseComponent$ChatSerializer").getMethod("a", String.class).invoke(null, ChatColor.translateAlternateColorCodes("&".charAt(0), m));
-						//Object packetPlayOutChat = Class.forName("net.minecraft.server." + v + ".PacketPlayOutChat").getConstructor(Class.forName("net.minecraft.server." + v + ".IChatBaseComponent")).newInstance(parsedMessage);
+    private String applyPlaceholders(String message, CommandSender target, Calendar calendar) {
+        String result = message;
 
-						// Drill down to the playerConnection which calls the sendPacket method
-						//Object craftPlayer = Class.forName("org.bukkit.craftbukkit." + v + ".entity.CraftPlayer").cast(to);
-						//Object craftHandle = Class.forName("org.bukkit.craftbukkit." + v + ".entity.CraftPlayer").getMethod("getHandle").invoke(craftPlayer);
-						//Object playerConnection = Class.forName("net.minecraft.server." + v + ".EntityPlayer").getField("playerConnection").get(craftHandle);
+        if (target instanceof Player) {
+            Player player = (Player) target;
+            result = result.replace("{NAME}", player.getName());
+            result = result.replace("{DISPLAY_NAME}", player.getDisplayName());
+            result = result.replace("{WORLD}", player.getWorld().getName());
+            result = result.replace("{BIOME}", player.getLocation().getBlock().getBiome().toString());
+        } else if (target instanceof ConsoleCommandSender) {
+            result = result.replace("{NAME}", target.getName());
+            result = result.replace("{DISPLAY_NAME}", target.getName());
+            result = result.replace("{WORLD}", "UNKNOWN");
+            result = result.replace("{BIOME}", "UNKNOWN");
+        }
 
-						// Send the message packet
-						//Class.forName("net.minecraft.server." + v + ".PlayerConnection").getMethod("sendPacket", Class.forName("net.minecraft.server." + v + ".Packet")).invoke(playerConnection, packetPlayOutChat);
-						
-						//Using spigot API instead of NMS
-						JSONObject obj = new JSONObject(m);
-						String text = obj.getString("text").replaceAll("&", "§");
-						ComponentBuilder cm = new ComponentBuilder(text);
-						if (m.contains("hoverEvent")) {
-							int in = 0;
-							for (Object js : obj.getJSONObject("hoverEvent").getJSONArray("value")) {
-								if (js.toString().contains("text")) {
-									cm.event(new HoverEvent(Action.SHOW_TEXT, new ComponentBuilder(obj.getJSONObject("hoverEvent").getJSONArray("value").getJSONObject(in).getString("text").replaceAll("&", "§")).create()));
-								}
-								in++;
-							}
-						} 
-						if (m.contains("clickEvent")) {
-							if (m.contains("open_url")) {
-								cm.event(new ClickEvent(ClickEvent.Action.OPEN_URL, obj.getJSONObject("clickEvent").getString("value")));
-							} else if (m.contains("run_command")) {
-								cm.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, obj.getJSONObject("clickEvent").getString("value")));
-							}
-						}
-						to.spigot().sendMessage(cm.create());
-						
-					} catch (Exception ignore) {
-						ignore.printStackTrace();
-					}
-				} else {
-					to.sendMessage(ChatColor.translateAlternateColorCodes("&".charAt(0), m));
-				}
-			}
+        result = result.replace("{ONLINE}", String.valueOf(Bukkit.getOnlinePlayers().size()));
+        result = result.replace("{MAX_ONLINE}", String.valueOf(Bukkit.getMaxPlayers()));
+        result = result.replace("{UNIQUE_PLAYERS}", String.valueOf(Bukkit.getOfflinePlayers().length));
 
-			for (String command : commands) {
-				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replaceFirst("/", ""));
-			}
-		}
-	}
+        result = result.replace("{YEAR}", String.valueOf(calendar.get(Calendar.YEAR)));
+        result = result.replace("{MONTH}", String.valueOf(calendar.get(Calendar.MONTH)));
+        result = result.replace("{WEEK_OF_MONTH}", String.valueOf(calendar.get(Calendar.WEEK_OF_MONTH)));
+        result = result.replace("{WEEK_OF_YEAR}", String.valueOf(calendar.get(Calendar.WEEK_OF_YEAR)));
+        result = result.replace("{DAY_OF_WEEK}", String.valueOf(calendar.get(Calendar.DAY_OF_WEEK)));
+        result = result.replace("{DAY_OF_MONTH}", String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)));
+        result = result.replace("{DAY_OF_YEAR}", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+        result = result.replace("{HOUR}", String.valueOf(calendar.get(Calendar.HOUR)));
+        result = result.replace("{HOUR_OF_DAY}", String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)));
+        result = result.replace("{MINUTE}", String.valueOf(calendar.get(Calendar.MINUTE)));
+        result = result.replace("{SECOND}", String.valueOf(calendar.get(Calendar.SECOND)));
+
+        return result;
+    }
+
+    private void sendJsonMessage(CommandSender target, String jsonPayload) {
+        try {
+            Component component = deserializeJson(jsonPayload);
+            target.sendMessage(component);
+        } catch (Exception ex) {
+            if (AutoMessage.log != null) {
+                AutoMessage.log.warning("Failed to parse JSON broadcast: " + ex.getMessage());
+            }
+            target.sendMessage(Utils.translateColorCodes(jsonPayload));
+        }
+    }
+
+    private Component deserializeJson(String jsonPayload) {
+        JSONObject root = new JSONObject(jsonPayload);
+        translateLegacyCodes(root);
+        return GSON_SERIALIZER.deserialize(root.toString());
+    }
+
+    private void translateLegacyCodes(Object node) {
+        if (node instanceof JSONObject) {
+            JSONObject object = (JSONObject) node;
+            for (String key : object.keySet()) {
+                Object value = object.get(key);
+                if (value instanceof JSONObject || value instanceof JSONArray) {
+                    translateLegacyCodes(value);
+                } else if ("text".equalsIgnoreCase(key) && value instanceof String) {
+                    object.put(key, Utils.translateColorCodes((String) value));
+                }
+            }
+        } else if (node instanceof JSONArray) {
+            JSONArray array = (JSONArray) node;
+            for (int i = 0; i < array.length(); i++) {
+                Object element = array.get(i);
+                if (element instanceof JSONObject || element instanceof JSONArray) {
+                    translateLegacyCodes(element);
+                } else if (element instanceof String) {
+                    array.put(i, Utils.translateColorCodes((String) element));
+                }
+            }
+        }
+    }
 }

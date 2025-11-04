@@ -10,9 +10,8 @@ import java.util.zip.ZipFile;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Check dev.bukkit.org to find updates for a given plugin, and download the updates if needed.
@@ -484,18 +483,19 @@ public class Updater {
 			final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			final String response = reader.readLine();
 
-			final JSONArray array = (JSONArray) JSONValue.parse(response);
+			final JSONArray array = new JSONArray(response);
 
-			if (array.size() == 0) {
+			if (array.length() == 0) {
 				this.plugin.getLogger().warning("The updater could not find any files for the project id " + this.id);
 				this.result = UpdateResult.FAIL_BADID;
 				return false;
 			}
 
-			this.versionName = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.TITLE_VALUE);
-			this.versionLink = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.LINK_VALUE);
-			this.versionType = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.TYPE_VALUE);
-			this.versionGameVersion = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.VERSION_VALUE);
+			JSONObject latest = array.getJSONObject(array.length() - 1);
+			this.versionName = latest.optString(Updater.TITLE_VALUE, "");
+			this.versionLink = latest.optString(Updater.LINK_VALUE, null);
+			this.versionType = latest.optString(Updater.TYPE_VALUE, "");
+			this.versionGameVersion = latest.optString(Updater.VERSION_VALUE, "");
 
 			return true;
 		} catch (final IOException e) {

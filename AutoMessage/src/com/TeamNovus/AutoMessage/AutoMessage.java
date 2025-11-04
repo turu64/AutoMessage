@@ -50,7 +50,7 @@ public class AutoMessage extends JavaPlugin {
 				e.printStackTrace();
 			}
 		}*/
-		log.info(getDescription().getName() + " loaded successfully!");
+		log.info(getDescription().getName() + " " + getDescription().getVersion() + " loaded successfully!");
 	}
 
 	@Override
